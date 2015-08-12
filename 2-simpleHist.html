@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>D3: Sorting and re-sorting visual elements with delay</title>
+      <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+      <style type="text/css">
+
+      
+        
+        .axis path, .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+          }
+          body {
+   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+   font-weight: 300;
+}
+.grid-background {
+  fill: #ddd;
+}
+.grid line {
+  stroke: #fff;
+}
+.grid .minor line {
+  stroke-opacity: .5;
+}
+.grid text {
+  display: none;
+}
+.axis line {
+  stroke: #000;
+}
+.axis path,
+.grid path {
+  display: none;
+}
+
+
+
+      </style>
+   </head>
+   <body>
+      <script type="text/javascript">
+
+  var dataset = [1,1,1,1,2,2,2,3,3,3,4,5,5,5]
+  var h = 500
+  var w = 960
+  var buckets = 5
+
+
+  var margin = {top: 10, right: 30, bottom: 40, left: 30},
+    width = w - margin.left - margin.right,
+    height = h - margin.top - margin.bottom;
+
+  //max
+  var max = Number(d3.max(dataset))+1;
+
+  var x = d3.scale.linear()
+    .domain([0, max])
+    .range([0, width]);
+
+
+  var data = d3.layout.histogram()
+      .bins(x.ticks(buckets))
+      (dataset);  
+
+  var y = d3.scale.linear()
+    .domain([0, d3.max(data, function(d) { return d.y; })])
+    .range([height, 0]);
+
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .ticks(buckets)
+    .orient("bottom");
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.append("rect")
+    .attr("class", "grid-background")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "grey");
+
+svg.append("g")
+    .attr("class", "grid")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.svg.axis().scale(x).ticks(20).tickSize(-height))
+  .selectAll(".tick")
+    .data(x.ticks(10), function(d) { return d; })
+  .exit()
+    .classed("minor", true);
+
+
+
+var bar = svg.selectAll(".bar")
+    .data(data)
+    .enter().append("g")
+    .attr("class", "bar")
+    .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
+bar.append("rect")
+    .attr("x", 1)
+    .attr("width", x(data[0].dx) - 1)
+    .attr("height", function(d) { return height - y(d.y); })
+    .attr("fill", function(d) { return "rgb(84,84," + (100) + ")"})
+    .on("mouseover", function(d) { d3.select(this).attr("fill", "orange");})
+    .on("mouseout", function(d) { d3.select(this).transition().duration(300).attr("fill", "rgb(84,84,100)");})
+    ;
+
+bar.append("text")
+    .attr("dy", ".75em")
+    .attr("y", 6)
+    .attr("x", x(data[0].dx) / 2)
+    .attr("text-anchor", "middle")
+    .attr("style","fill:#fff")
+    .text(function(d) {d.y;});
+
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+//draw the axis labels
+svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("class", "black")
+            .attr("transform", "translate("+ (width/2) +","+(height+40)+")") 
+            .text("the x axis");
+
+svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("class", "black")
+            .attr("transform", "translate("+ (-10) +","+(height/2)+")rotate(-90)")
+            .text("the y axis");
+
+
+
+
+
+
+
+
+         
+      </script>
+   </body>
+</html>
