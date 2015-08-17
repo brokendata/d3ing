@@ -42,11 +42,11 @@
                   .attr("height", height + margin.top + margin.bottom)
                   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-          
+  function drawData(column) {
+        
         d3.csv("data/iris.csv", function(incdata) {
           var dataset = incdata.map(function(row){
-            return parseFloat(row["sepal width"]);})
+            return parseFloat(row[column]);})
 
 
           var max = Number(d3.max(dataset)) + 1;
@@ -61,7 +61,7 @@
               (dataset);  
 
           var y = d3.scale.linear()
-            .domain([0, d3.max(	data, function(d) { return d.y; })])
+            .domain([0, d3.max( data, function(d) { return d.y; })])
             .range([height, 0]);
 
 
@@ -110,71 +110,10 @@
                     .attr("transform", "translate("+ (-10) +","+(height/2)+")rotate(-90)")
                     .text("the y axis");
           })
+        ;}
+
+    drawData("sepal length")
         
-    d3.select("#opts")        
-        .on("change", function(){
-          var col = d3.select(this).property('value'); 
-
-          d3.csv("data/iris.csv", function(incdata){
-            var dataset = incdata.map(function(row){
-            return parseFloat(row[col]);})
-
-
-
-          var max = Number(d3.max(dataset)) + 1;
-
-           var x = d3.scale.linear()
-            .domain([0, max])
-            .range([0, width]);
-
-
-
-          var data = d3.layout.histogram()
-              .bins(x.ticks(buckets))
-              (dataset);  
-
-
-
-          var y = d3.scale.linear()
-            .domain([0, d3.max(data, function(d) { return d.y; })])
-            .range([height, 0]);
-
-            d3.selectAll(".bar")
-              .data(data)
-              .transition()
-              .duration(1000)
-              .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-
-            d3.selectAll("rect")
-                .data(data)
-                .transition()
-                .duration(1000)
-                .attr("x", 0)
-                .attr("width", x(data[0].dx) - 1)
-
-
-
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(buckets)
-            .orient("bottom");
-
-            svg.select(".x.axis")
-              .transition()
-              .attr("transform", "translate(0," + height + ")")
-              .call(xAxis)
-
-
-
-
-
-
-
-          })
-
-
-        })
-
 
 
 
