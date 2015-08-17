@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-// http://stackoverflow.com/questions/24193593/d3-how-to-// change-dataset-based-on-drop-down-box-selection
 <html lang="en">
    <head>
       <meta charset="utf-8">
@@ -20,10 +19,15 @@
    <option value="ds3">petal length </option>
    <option value="ds3">petal width </option>
       <script type="text/javascript">
+      // http://stackoverflow.com/questions/24193593/d3-how-to-// change-dataset-based-on-drop-down-box-selection
+      //http://stackoverflow.com/questions/16919280/how-to-update-axis-using-d3-js
+      //http://vallandingham.me/bubble_charts_in_d3.html
+      //http://www.developer.com/java/fun-with-d3.js-data-visualization-eye-candy-with-streaming-json.html
+      //
 
-      var h = 500
-      var w = 960
-      var buckets = 5
+      var h = 300
+      var w = 600
+      var buckets = 8
 
 
       var margin = {top: 10, right: 30, bottom: 40, left: 30},
@@ -36,46 +40,75 @@
                   .attr("height", height + margin.top + margin.bottom)
                   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      function generateHis(column) {
-        d3.csv("data/iris.csv", function(data) {
-          var histData = data.map(function(row){
-            return parseInt(row[column]);
-          })
+
+      
+        d3.csv("data/iris.csv", function(incdata) {
+          var dataset = incdata.map(function(row){
+            return parseInt(row["sepal length"]);})
+
+
+          var max = Number(d3.max(dataset)) + 1;
+
+           var x = d3.scale.linear()
+            .domain([0, max])
+            .range([0, width]);
+
+
+          var data = d3.layout.histogram()
+              .bins(x.ticks(buckets))
+              (dataset);  
+
+          var y = d3.scale.linear()
+            .domain([0, d3.max(	data, function(d) { return d.y; })])
+            .range([height, 0]);
+
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .ticks(buckets)
+            .orient("bottom");
+
+
+        var bar = svg.selectAll(".bar")
+            .data(data)
+            .enter().append("g")
+            .attr("class", "bar")
+            .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
+        console.log(data[2].dx)
+
+
+        bar.append("rect")
+            .attr("x", 1)
+            .attr("width", x(data[0].dx) - 1)
+            .attr("height", function(d) { return height - y(d.y); })
+            .attr("fill", function(d) { return "rgb(84,84," + (100) + ")"})
+            .on("mouseover", function(d) { d3.select(this).attr("fill", "orange");})
+            .on("mouseout", function(d) { d3.select(this).transition().duration(300).attr("fill", "rgb(84,84,100)");})
+            ;
+
   
 
-          
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
 
-          var appending = d3.select("body")
-                            .selectAll("p")
-                            .data(histData)
+        //draw the axis labels
+        svg.append("text")
+                    .attr("text-anchor", "middle")
+                    .attr("class", "black")
+                    .attr("transform", "translate("+ (width/2.5) +","+(height+40)+")") 
+                    .text("the x axis");
 
-          appending.enter().append("p")
-
-          appending.transition()
-                   .ease("linear")
-                   .text(function(d){return d;})
-
-          appending.exit().remove()
-
-
-
-        });
-      } 
-
-      function kernelDensityEstimator(kernel, x) {
-        return function(sample) {
-          return x.map(function(x) {
-            return [x, d3.mean(sample, function(v) { return kernel(x - v); })];
-          });
-        };
-      }
-
-      function epanechnikovKernel(scale) {
-        return function(u) {
-          return Math.abs(u /= scale) <= 1 ? .75 * (1 - u * u) / scale : 0;
-        };
-      }
-
+        svg.append("text")
+                    .attr("text-anchor", "middle")
+                    .attr("class", "black")
+                    .attr("transform", "translate("+ (-20) +","+(height/2)+")rotate(-90)")
+                    .text("the y axis");
+          })
+        
+      
      
 
 
