@@ -1,129 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="utf-8">
-      <title>D3: Sorting and re-sorting visual elements with delay</title>
-      <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-      <style type="text/css">
-         rect:hover {
-            fill: Turquoise  ;
-         }
-         
-      </style>
-   </head>
-   <body>
-   <div>
-   <select id = "opts">
-   <option value="sepal length">sepal length</option>
-   <option value="sepal width" selected="selected">sepal width</option> 
-   <option value="petal length">petal length </option>
-   <option value="petal width">petal width </option>
-   </select><div>
-      <script type="text/javascript">
-      // http://stackoverflow.com/questions/24193593/d3-how-to-// change-dataset-based-on-drop-down-box-selection
-      //http://stackoverflow.com/questions/16919280/how-to-update-axis-using-d3-js
-      //http://vallandingham.me/bubble_charts_in_d3.html
-      //http://www.developer.com/java/fun-with-d3.js-data-visualization-eye-candy-with-streaming-json.html
-      //
-      var h = 300
-      var w = 600
-      var buckets = 8
-      var margin = {top: 10, right: 30, bottom: 40, left: 30},
-        width = w - margin.left - margin.right,
-        height = h - margin.top - margin.bottom;
-      var svg = d3.select("body")
-                  .append("svg")
-                  .attr("width", width + margin.left + margin.right)
-                  .attr("height", height + margin.top + margin.bottom)
-                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-          
-        d3.csv("data/iris.csv", function(incdata) {
-          var dataset = incdata.map(function(row){
-            return parseFloat(row["sepal width"]);})
-          var max = Number(d3.max(dataset)) + 1;
-           var x = d3.scale.linear()
-            .domain([0, max])
-            .range([0, width]);
-          var data = d3.layout.histogram()
-              .bins(x.ticks(buckets))
-              (dataset);  
-          var y = d3.scale.linear()
-            .domain([0, d3.max( data, function(d) { return d.y; })])
-            .range([height, 0]);
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(buckets)
-            .orient("bottom");
-        var bar = svg.selectAll(".bar")
-            .data(data)
-            .enter().append("g")
-            .attr("class", "bar")
-            .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-        bar.append("rect")
-            .on("mouseover", function(d) { d3.select(this).attr("fill", "orange");})
-            .on("mouseout", function(d) { d3.select(this).transition().duration(300).attr("fill", "rgb(84,84,100)");})
-            .transition()
-            .attr("x", 1)
-            .attr("width", x(data[0].dx) - 1)
-            .attr("height", function(d) { return height - y(d.y); })
-            .attr("fill", function(d) { return "rgb(84,84," + (100) + ")"})
-            ;
-  
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-        //draw the axis labels
-        svg.append("text")
-                    .attr("text-anchor", "middle")
-                    .attr("class", "black")
-                    .attr("transform", "translate("+ (width/2) +","+(height+40)+")") 
-                    .text("the x axis");
-        svg.append("text")
-                    .attr("text-anchor", "middle")
-                    .attr("class", "black")
-                    .attr("transform", "translate("+ (-10) +","+(height/2)+")rotate(-90)")
-                    .text("the y axis");
-          })
+
+<head>
+    <meta charset="utf-8">
+    <title>D3: Sorting and re-sorting visual elements with delay</title>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <style type="text/css">
+        rect:hover {
+            fill: Turquoise;
+        }
         
-    d3.select("#opts")        
-        .on("change", function(){
-          var col = d3.select(this).property('value'); 
-          d3.csv("data/iris.csv", function(incdata){
-            var dataset = incdata.map(function(row){
-            return parseFloat(row[col]);})
-          var max = Number(d3.max(dataset)) + 1;
-           var x = d3.scale.linear()
-            .domain([0, max])
-            .range([0, width]);
-          var data = d3.layout.histogram()
-              .bins(x.ticks(buckets))
-              (dataset);  
-          var y = d3.scale.linear()
-            .domain([0, d3.max(data, function(d) { return d.y; })])
-            .range([height, 0]);
-            d3.selectAll(".bar")
-              .data(data)
-              .transition()
-              .duration(1000)
-              .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-            
-            d3.selectAll("rect")
-                .data(data)
-                .transition()
-                .duration(1000)
-                .attr("x", 0)
-                .attr("width", x(data[0].dx) - 1)
-                .attr("height", function(d) { return height - y(d.y); })
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(buckets)
-            .orient("bottom");
-            svg.select(".x.axis")
-              .transition()
-              .attr("transform", "translate(0," + height + ")")
-              .call(xAxis)
-          })
-        })
-      </script>
-   </body> </html>
+        .domain {
+            fill: none;
+            stroke: black;
+            stroke-width;
+            1;
+        }
+        
+        .axis path,
+        .axis line {}
+    </style>
+</head>
+
+<body>
+    <div>
+        <select id="opts">
+            <option value="sepal length">sepal length</option>
+            <option value="sepal width" selected="selected">sepal width</option>
+            <option value="petal length">petal length </option>
+            <option value="petal width">petal width </option>
+        </select>
+        <div>
+            <script type="text/javascript">
+
+              //Declare globals 
+
+                var h = 300
+                var w = 600
+                var buckets = 8
+                var margin = {
+                        top: 10,
+                        right: 30,
+                        bottom: 40,
+                        left: 30
+                    },
+                    width = w - margin.left - margin.right,
+                    height = h - margin.top - margin.bottom;
+
+                //Draw Initial Canvas
+                
+                var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                //Load data 
+                d3.csv("data/iris.csv", function(incdata) {
+                    var dataset = incdata.map(function(row) {
+                        return parseFloat(row["sepal width"]);
+                    })
+
+                    // Setup scales / axis / layout
+                    var max = Number(d3.max(dataset)) + 1;
+                    var x = d3.scale.linear()
+                        .domain([0, max])
+                        .range([0, width]);
+                    
+                    var data = d3.layout.histogram()
+                        .bins(x.ticks(buckets))
+                        (dataset);
+                    
+                    var y = d3.scale.linear()
+                        .domain([0, d3.max(data, function(d) {
+                            return d.y;
+                        })])
+                        .range([height, 0]);
+                    
+                    var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .ticks(buckets)
+                        .orient("bottom");
+                    
+                    //append group element
+                    //allows us to add various SVG elements to a single tag
+                    var bar = svg.selectAll(".bar")
+                        .data(data)
+                        .enter().append("g")
+                        .attr("class", "bar")
+                        .attr("transform", function(d) {
+                            return "translate(" + x(d.x) + "," + y(d.y) + ")";
+                        });
+                    
+                    //add rect to g 
+                    bar.append("rect")
+                        .on("mouseover", function(d) {
+                            d3.select(this).attr("fill", "orange");
+                        })
+                        .on("mouseout", function(d) {
+                            d3.select(this).transition().duration(300).attr("fill", "rgb(84,84,100)");
+                        })
+                        .transition()
+                        .attr("x", 1)
+                        .attr("width", x(data[0].dx) - 1)
+                        .attr("height", function(d) {
+                            return height - y(d.y);
+                        })
+                        .attr("fill", function(d) {
+                            return "rgb(84,84," + (100) + ")"
+                        });
+
+                    //possible to add text to <g> as well.
+
+                    svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
+                    /
+                    /draw the axis labels
+                    svg.append("text")
+                        .attr("text-anchor", "middle")
+                        .attr("class", "black")
+                        .attr("transform", "translate(" + (width / 2) + "," + (height + 40) + ")")
+                        .text("the x axis");
+                    svg.append("text")
+                        .attr("text-anchor", "middle")
+                        .attr("class", "black")
+                        .attr("transform", "translate(" + (-10) + "," + (height / 2) + ")rotate(-90)")
+                        .text("the y axis");
+                })
+
+                //update the graph based on the value in the dropdown
+                d3.select("#opts")
+                    .on("change", function() {
+                        var col = d3.select(this).property('value');
+                        d3.csv("data/iris.csv", function(incdata) {
+                            var dataset = incdata.map(function(row) {
+                                return parseFloat(row[col]);
+                            })
+                            var max = Number(d3.max(dataset)) + 1;
+                            var x = d3.scale.linear()
+                                .domain([0, max])
+                                .range([0, width]);
+                            var data = d3.layout.histogram()
+                                .bins(x.ticks(buckets))
+                                (dataset);
+                            var y = d3.scale.linear()
+                                .domain([0, d3.max(data, function(d) {
+                                    return d.y;
+                                })])
+                                .range([height, 0]);
+                            
+                            // reposition the .bar elements
+                            d3.selectAll(".bar")
+                                .data(data)
+                                .transition()
+                                .duration(1000)
+                                .attr("transform", function(d) {
+                                    return "translate(" + x(d.x) + "," + y(d.y) + ")";
+                                });
+
+                            // redraw the rectagles 
+                            d3.selectAll("rect")
+                                .data(data)
+                                .transition()
+                                .duration(1000)
+                                .attr("x", 0)
+                                .attr("width", x(data[0].dx) - 1)
+                                .attr("height", function(d) {
+                                    return height - y(d.y);
+                                })
+                            
+                            //Rescale the x axis
+                            var xAxis = d3.svg.axis()
+                                .scale(x)
+                                .ticks(buckets)
+                                .orient("bottom");
+                            svg.select(".x.axis")
+                                .transition()
+                                .attr("transform", "translate(0," + height + ")")
+                                .call(xAxis)
+                        })
+                    })
+            </script>
+</body>
+
+</html>
