@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>D3: Sorting and re-sorting visual elements with delay</title>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <script
+   src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script
+    <style type="text/css"> </style>
+</head>
+
+<body>
+            <script type="text/javascript">
+
+              //Declare globals 
+
+                var h = 600
+                var w = 900
+                var buckets = 8
+                var margin = {
+                        top: 10,
+                        right: 30,
+                        bottom: 40,
+                        left: 30
+                    },
+                    width = w - margin.left - margin.right,
+                    height = h - margin.top - margin.bottom;
+
+                //Draw Initial Canvas
+                
+                var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+                d3.csv("data/pt.csv", function(incData){
+                  
+                    var nest = d3.nest()
+                        .key(function(d){return d.Type})
+                        .entries(incData)
+
+                    var packData = {id: "Periodic Table", values : nest}
+
+
+                    var color = d3.scale.category20()
+                    
+                    var packChart = d3.layout.pack();
+
+                    packChart.size([500,500])
+                        .children(function(d){return d.values})
+                        .value(function(d){return parseFloat(d['Atomic Number'])})
+                        //.value(function(d){return 1})
+
+                    //console.log(packChart(packData))
+
+                    d3.select("svg")
+                        .selectAll("circle")
+                        .data(packChart(packData))
+                        .enter()
+                        .append("circle")
+                        .each(function(d){console.log(d)})
+                        .attr("r", function(d){ return d.r;})
+                        .attr("cx", function(d){ return d.x;})
+                        .attr("cy", function(d){ return d.y;})
+                        .style("fill", function(d){ return color(d.Type)})
+                        .style("stroke", "black")
+
+                })
+
+            </script>
+</body>
+
+</html>
