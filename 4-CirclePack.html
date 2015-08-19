@@ -7,21 +7,7 @@
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script
    src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script
-    <style type="text/css">
-        rect:hover {
-            fill: Turquoise;
-        }
-        
-        .domain {
-            fill: none;
-            stroke: black;
-            stroke-width;
-            1;
-        }
-        
-        .axis path,
-        .axis line {}
-    </style>
+    <style type="text/css"> </style>
 </head>
 
 <body>
@@ -29,8 +15,8 @@
 
               //Declare globals 
 
-                var h = 300
-                var w = 600
+                var h = 600
+                var w = 900
                 var buckets = 8
                 var margin = {
                         top: 10,
@@ -51,12 +37,37 @@
 
 
                 d3.csv("data/pt.csv", function(incData){
-                  var nest = d3.nest()
-                    .key(function(d){return d.Type})
-                    .entries(incData)
+                  
+                    var nest = d3.nest()
+                        .key(function(d){return d.Type})
+                        .entries(incData)
 
-                    colorDomain = incData
-                    .map(function(d){d.Type})
+                    var packData = {id: "Periodic Table", values : nest}
+
+
+                    var color = d3.scale.category20()
+                    
+                    var packChart = d3.layout.pack();
+
+                    packChart.size([500,500])
+                        .children(function(d){return d.values})
+                        .value(function(d){return parseFloat(d['Atomic Number'])})
+                        //.value(function(d){return 1})
+
+                    //console.log(packChart(packData))
+
+                    d3.select("svg")
+                        .selectAll("circle")
+                        .data(packChart(packData))
+                        .enter()
+                        .append("circle")
+                        .each(function(d){console.log(d)})
+                        .attr("r", function(d){ return d.r;})
+                        .attr("cx", function(d){ return d.x;})
+                        .attr("cy", function(d){ return d.y;})
+                        .style("fill", function(d){ return color(d.Type)})
+                        .style("stroke", "black")
+
                 })
 
             </script>
