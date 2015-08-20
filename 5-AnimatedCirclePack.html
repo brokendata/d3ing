@@ -34,9 +34,9 @@ circle.child {
 
 
 .label {
-  font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
   text-anchor: middle;
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+
 }
 
         
@@ -44,8 +44,8 @@ circle.child {
         .axis line {}
     </style>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-    <script
-   src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+    <script src="//cdn.rawgit.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.js"></script>
 </head>
 
 <body>
@@ -83,7 +83,12 @@ circle.child {
                     var packData = {id: "Periodic Table", values : nest}
 
 
-                    var color = d3.scale.category20()
+                    var color1 = d3.scale.category20()
+
+                    var color = d3.scale.linear()
+                        .domain(_.unique(_.pluck(incData, 'Type')))
+                        //.range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+                        .interpolate(d3.interpolateHcl);
                     
                     var packChart = d3.layout.pack();
 
@@ -111,18 +116,20 @@ circle.child {
                         .style("stroke", function(d){ return d.children ? "black" : null})
                         .style("opacity", function(d){return d.r > 35 ? .39 : .80 ;})
 
+                    //Add Hover Behaior    
                     node.append("title")
                         .text(function(d){return d.Element})
 
 
 
-                    //Add Hover behavior
+                    //Add Lables
+                    //d.key is only present in parent circle nodes // Types
                    svg.append("g").selectAll("text")
                         .data(packChart(packData))
                         .enter()
                         .append("text")
                         .attr("text-anchor", "middle")
-                        .attr("fill", "black")
+                        .attr("fill", "white")
                         .attr("class", "label")
                         //.style("dislay", None)
                         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
