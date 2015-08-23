@@ -37,6 +37,13 @@ circle.child {
   pointer-events: none;
 }
 
+#element{
+    font: 70px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    color: grey;
+    
+}
+
 
 .label {
   font: 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -58,8 +65,8 @@ circle.child {
 
               //Declare globals 
 
-                var h = 1000
-                var w = 1000
+                var h = 550
+                var w = 550
                 var buckets = 8
                 var margin = {
                         top: 10,
@@ -121,12 +128,23 @@ circle.child {
                         .style("opacity", function(d){return d.r > 35 ? .20 : .80 ;})
                         .on("mouseover", function(){
 
-                            if (this.getAttribute('class') == "node node --leaf circle")
-                                d3.select(this)
-                                    .style("fill", "red")
+                            if (this.getAttribute('class') == "node node --leaf circle") {
+                                var data = this.__data__
+
+                                d3.select(this).style("fill", "magenta")
+                               
+                                d3.select("#element")
+                                  .data([data])
+                                   .transition()
+                                   .duration(1000)
+                                  .text(function(d){return d.Element}) }
+
+                              
                         })
                         .on("mouseout", function(){
                             d3.select(this)
+                               .transition()
+                               .duration(250)
                                 .style("fill", function(d) { return !d.children ? color(d.Type) : "aqua"; })
                         })
                               
@@ -153,6 +171,7 @@ circle.child {
                 })
 
             </script>
+            <div id="element" align="top"></div>
 </body>
 
 </html>
