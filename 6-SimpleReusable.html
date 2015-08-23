@@ -13,9 +13,16 @@
 <div class="chart-example" id="chart"></div>
         <script type="text/javascript">
         //Reusable chart -- 
+       
+       var data = [1,2,3]
 
-        var p = d3.select('body').append('p')
-        p.html('New Paragraph.')
+       function initDiv(selection) {
+        select.each(function(data){
+            d3.select(this).append('p')
+                .html(data)
+        })
+       }
+
 
             
 

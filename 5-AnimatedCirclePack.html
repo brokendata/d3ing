@@ -17,10 +17,15 @@ circle {
   pointer-events: all;
 }
 
-circle.parent {
+.node:hover{
+    stroke:#000;
+    stroke-width: 1.5px;
+}
+
+.node.parent {
   fill: #1f77b4;
   fill-opacity: .1;
-  stroke: steelblue;
+  stroke: black;
 }
 
 circle.parent:hover {
@@ -85,14 +90,13 @@ circle.child {
 
                     var color1 = d3.scale.category20()
 
-                    var color = d3.scale.linear()
-                        .domain(_.unique(_.pluck(incData, 'Type')))
-                        //.range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
-                        .interpolate(d3.interpolateHcl);
+                    var color = d3.scale.ordinal()
+                        //.domain(_.unique(_.pluck(incData, 'Type')))
+                        .range(colorbrewer.BuPu[9])
                     
                     var packChart = d3.layout.pack();
 
-                    packChart.size([width,height])
+                    packChart.size([500,500])
                         .children(function(d){return d.values})
                         .value(function(d){return parseFloat(d['Atomic Number'])})
                         //.value(function(d){return 1})
@@ -107,14 +111,25 @@ circle.child {
                     // Add circles
                     node
                         .append("circle")
-                         .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
+                         .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node --leaf" : "node node --root"; })
                         .attr("r", function(d){ return d.r;})
                         .attr("cx", function(d){ return d.x;})
                         .attr("cy", function(d){ return d.y;})
                         .classed("circle", true)
-                        .style("fill", function(d) { return !d.children ? color(d.Type) : "steelblue"; })
-                        .style("stroke", function(d){ return d.children ? "black" : null})
-                        .style("opacity", function(d){return d.r > 35 ? .39 : .80 ;})
+                        .style("fill", function(d) { return !d.children ? color(d.Type) : "aqua"; })
+                        //.style("stroke", function(d){ return !d.children ? "black" : null})
+                        .style("opacity", function(d){return d.r > 35 ? .20 : .80 ;})
+                        .on("mouseover", function(){
+
+                            if (this.getAttribute('class') == "node node --leaf circle")
+                                d3.select(this)
+                                    .style("fill", "red")
+                        })
+                        .on("mouseout", function(){
+                            d3.select(this)
+                                .style("fill", function(d) { return !d.children ? color(d.Type) : "aqua"; })
+                        })
+                              
 
                     //Add Hover Behaior    
                     node.append("title")
@@ -129,14 +144,11 @@ circle.child {
                         .enter()
                         .append("text")
                         .attr("text-anchor", "middle")
-                        .attr("fill", "white")
+                        .attr("fill", "black")
                         .attr("class", "label")
                         //.style("dislay", None)
                         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
                         .text(function(d){return d.key})
-
-
-
 
                 })
 
