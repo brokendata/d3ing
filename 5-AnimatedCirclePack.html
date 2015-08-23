@@ -6,54 +6,41 @@
     <style type="text/css">
 r-events: none;
 }
-
 text.parent {
-  fill: #1f77b4;
+    fill: #1f77b4;
 }
-
 circle {
-  fill: #ccc;
-  stroke: #999;
-  pointer-events: all;
+    fill: #ccc;
+    stroke: #999;
+    pointer-events: all;
 }
-
-.node:hover{
-    stroke:#000;
+.node:hover {
+    stroke: #000;
     stroke-width: 1.5px;
 }
-
 .node.parent {
-  fill: #1f77b4;
-  fill-opacity: .1;
-  stroke: black;
+    fill: #1f77b4;
+    fill-opacity: .1;
+    stroke: black;
 }
-
 circle.parent:hover {
-  stroke: #ff7f0e;
-  stroke-width: .5px;
+    stroke: #ff7f0e;
+    stroke-width: .5px;
 }
-
 circle.child {
-  pointer-events: none;
+    pointer-events: none;
 }
-
-#element{
+#element {
     font: 70px "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: bold;
     color: grey;
-    
 }
-
-
 .label {
-  font: 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  text-anchor: middle;
-
+    font: 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-anchor: middle;
 }
-
-        
-        .axis path,
-        .axis line {}
+.axis path,
+.axis line {}
     </style>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
@@ -61,117 +48,142 @@ circle.child {
 </head>
 
 <body>
-            <script type="text/javascript">
+    <script type="text/javascript">
+    //Declare globals 
 
-              //Declare globals 
+    var h = 550
+    var w = 550
+    var buckets = 8
+    var margin = {
+            top: 10,
+            right: 30,
+            bottom: 40,
+            left: 30
+        },
+        width = w - margin.left - margin.right,
+        height = h - margin.top - margin.bottom;
 
-                var h = 550
-                var w = 550
-                var buckets = 8
-                var margin = {
-                        top: 10,
-                        right: 30,
-                        bottom: 40,
-                        left: 30
-                    },
-                    width = w - margin.left - margin.right,
-                    height = h - margin.top - margin.bottom;
+    //Draw Initial Canvas
 
-                //Draw Initial Canvas
-                
-                var svg = d3.select("body")
-                    .append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-                d3.csv("data/pt.csv", function(incData){
-                  
-                    var nest = d3.nest()
-                        .key(function(d){return d.Type})
-                        .entries(incData)
-
-                    var packData = {id: "Periodic Table", values : nest}
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-                    var color1 = d3.scale.category20()
+    d3.csv("data/pt.csv", function(incData) {
+        // groups by key, creates k,v pairs of type: [values]
 
-                    var color = d3.scale.ordinal()
-                        //.domain(_.unique(_.pluck(incData, 'Type')))
-                        .range(colorbrewer.BuPu[9])
-                    
-                    var packChart = d3.layout.pack();
+        var nest = d3.nest()
+            .key(function(d) {
+                return d.Type
+            })
+            .entries(incData)
 
-                    packChart.size([500,500])
-                        .children(function(d){return d.values})
-                        .value(function(d){return parseFloat(d['Atomic Number'])})
-                        //.value(function(d){return 1})
+        // adds 1 top level node for the entire chart
 
-                    //Create container for the circles 
-                    var node = svg.append("g").selectAll("circle")
-                        .data(packChart(packData))
-                        .enter()
-                        .append("g")
-                        .attr("transform","translate(20,20)")
+        var packData = {
+            id: "Periodic Table",
+            values: nest
+        }
 
-                    // Add circles
-                    node
-                        .append("circle")
-                         .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node --leaf" : "node node --root"; })
-                        .attr("r", function(d){ return d.r;})
-                        .attr("cx", function(d){ return d.x;})
-                        .attr("cy", function(d){ return d.y;})
-                        .classed("circle", true)
-                        .style("fill", function(d) { return !d.children ? color(d.Type) : "aqua"; })
-                        //.style("stroke", function(d){ return !d.children ? "black" : null})
-                        .style("opacity", function(d){return d.r > 35 ? .20 : .80 ;})
-                        .on("mouseover", function(){
+        //scale colors by type 
+        var color = d3.scale.ordinal()
+            //.domain(_.unique(_.pluck(incData, 'Type')))
+            .range(colorbrewer.BuPu[9])
 
-                            if (this.getAttribute('class') == "node node --leaf circle") {
-                                var data = this.__data__
+        // init packchart
+        var packChart = d3.layout.pack();
 
-                                d3.select(this).style("fill", "magenta")
-                               
-                                d3.select("#element")
-                                  .data([data])
-                                   .transition()
-                                   .duration(1000)
-                                  .text(function(d){return d.Element}) }
+        packChart.size([500, 500])
+            .children(function(d) {
+                return d.values
+            })
+            .value(function(d) {
+                return parseFloat(d['Atomic Number'])
+            })
+            //.value(function(d){return 1})
 
-                              
+        //Create container for the circles 
+        //<svg><circle g > 
+        var node = svg.append("g").selectAll("circle")
+            .data(packChart(packData))
+            .enter()
+            .append("g")
+            .attr("transform", "translate(20,20)")
+
+        // Add circles
+        node
+            .append("circle")
+            .attr("class", function(d) {
+                return d.parent ? d.children ? "node" : "node node --leaf" : "node node --root";
+            })
+            .attr("r", function(d) {
+                return d.r;
+            })
+            .attr("cx", function(d) {
+                return d.x;
+            })
+            .attr("cy", function(d) {
+                return d.y;
+            })
+            .classed("circle", true)
+            .style("fill", function(d) {
+                return !d.children ? color(d.Type) : "aqua";
+            })
+            .style("opacity", function(d) {
+                return d.r > 35 ? .20 : .80;
+            })
+            .on("mouseover", function() {
+
+                if (this.getAttribute('class') == "node node --leaf circle") {
+                    var data = this.__data__
+
+                    d3.select(this).style("fill", "magenta")
+
+                    d3.select("#element")
+                        .data([data])
+                        .transition()
+                        .duration(1000)
+                        .text(function(d) {
+                            return d.Element
                         })
-                        .on("mouseout", function(){
-                            d3.select(this)
-                               .transition()
-                               .duration(250)
-                                .style("fill", function(d) { return !d.children ? color(d.Type) : "aqua"; })
-                        })
-                              
-
-                    //Add Hover Behaior    
-                    node.append("title")
-                        .text(function(d){return d.Element})
+                }
 
 
+            })
+            .on("mouseout", function() {
+                d3.select(this)
+                    .transition()
+                    .duration(250)
+                    .style("fill", function(d) {
+                        return !d.children ? color(d.Type) : "aqua";
+                    })
+            })
 
-                    //Add Lables
-                    //d.key is only present in parent circle nodes // Types
-                   svg.append("g").selectAll("text")
-                        .data(packChart(packData))
-                        .enter()
-                        .append("text")
-                        .attr("text-anchor", "middle")
-                        .attr("fill", "black")
-                        .attr("class", "label")
-                        //.style("dislay", None)
-                        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-                        .text(function(d){return d.key})
 
-                })
+        //Add Lables to the `type` circles 
+        //d.key is only present in parent circle nodes // Types
+        //<svg><text g> 
+        svg.append("g").selectAll("text")
+            .data(packChart(packData))
+            .enter()
+            .append("text")
+            .attr("text-anchor", "middle")
+            .attr("fill", "black")
+            .attr("class", "label")
+            //.style("dislay", None)
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            })
+            .text(function(d) {
+                return d.key
+            })
 
-            </script>
-            <div id="element" align="top"></div>
+    })
+    </script>
+    <div id="element" align="top"></div>
 </body>
 
 </html>
