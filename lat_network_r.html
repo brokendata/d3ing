@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <style type="text/css"> 
+.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.0px;
+}
+
+.node text {
+stroke:#333;
+cursos:pointer;
+}
+
+.node circle{
+stroke:#fff;
+stroke-width:3px;
+fill:#555;
+}
+}</style>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+    <script src="//cdn.rawgit.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.js"></script>
+</head>
+
+<body>
+<p>Latent Dimension #20 top 30 Styles per outlier Feature</p>
+<div class="chart-example" id="chart"></div>
+        <script type="text/javascript">
+        //http://stackoverflow.com/questions/11269067/d3-js-nodes-as-images
+
+        //http://bl.ocks.org/eesur/be2abfb3155a38be4de4
+var width = 960,
+    height = 960;
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var force = d3.layout.force()
+  .charge(-210)
+  .linkDistance(140)
+    .size([width, height]);
+
+
+d3.csv("data/d3files/lat15.csv", function(error, links) {
+  if (error) throw error;
+
+  var nodesByName = {};
+
+  var deps = _.pluck(links, 'cmos_item')
+  var images = _.pluck(links, 'image_link')
+
+  var nodeImages = _.object(deps,images)
+
+  console.log(nodeImages)
+
+  console.log(nodesByName)
+
+
+ links.forEach(function(link) {
+    link.source = nodeByName(link.cmos_item);
+    link.target = nodeByName(link.fqn);
+  });
+
+  // Extract the array of nodes from the map by name.
+  var nodes = d3.values(nodesByName);
+
+  // Create the link lines.
+  var link = svg.selectAll(".link")
+      .data(links)
+    .enter().append("svg:path")
+      .attr("class", "link");
+
+  // Create the node circles.
+  var node = svg.selectAll(".node")
+      .data(nodes)
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("r", 4.5)
+      .each(function(d){console.log(d)})
+      .call(force.drag);
+    
+    node.append("image")
+         .attr("xlink:href", function(d){return nodeImages[d.name];})
+      //.attr("xlink:href", "https://github.com/favicon.ico")
+      .attr("x", -8)
+      .attr("y", -8)
+      .attr("width", 75)
+      .attr("height", 75)
+      .append("text")
+      .attr("dx", 12)
+      .attr("dx", ".35em")
+      .text(function(d){ return d.name.indexOf("/") > -1 ? d.name : null})
+
+  // Start the force layout.
+
+
+  force
+      .nodes(nodes)
+      .links(links)
+      .on("tick", tick)
+      .start();
+
+  function tick() {
+    link.attr("d", function(d) {
+var dx = d.target.x - d.source.x,
+    dy = d.target.y - d.source.y,
+    dr = Math.sqrt(dx * dx + dy * dy);
+return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+});
+
+    node.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  }
+
+  function nodeByName(name) {
+    return nodesByName[name] || (nodesByName[name] = {name: name});
+  }
+});
+        
+
+        </script>
+    <div id ="traditional"></div>
+</body>
+
+</html>
