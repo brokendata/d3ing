@@ -27,6 +27,7 @@ stroke-width:3px;
 fill:#555;
 }
 
+
 select { border:1; color:#666; background:transparent;
 font-size:20px; font-weight:bold; padding:2px 10px; width:378px;
 *width:350px; *background:#58B14C; -webkit-appearance: none; 
@@ -52,6 +53,10 @@ box-shadow: 1px 1px 11px #330033;
 <option value="lat30">lat30</option>
   <!-- and so on... -->   
   </select> 
+
+<div class = "container" id = "network"> </div>
+<div class = "container" id = "scatter"</div> 
+
 <div class="chart-example" id="chart"></div>
         <script type="text/javascript">
         //http://stackoverflow.com/questions/11269067/d3-js-nodes-as-images
@@ -60,10 +65,10 @@ box-shadow: 1px 1px 11px #330033;
 var fileroot= "data/d3files/"
 
 
-var width = 960,
-    height = 960;
+var width = 1000,
+    height = 1000;
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select(".container#network").append("svg")
     .attr("width", width)
     .attr("height", height);
 
